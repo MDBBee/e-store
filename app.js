@@ -10,6 +10,7 @@ const db = require('./db/connect');
 
 // Routes imports
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoute');
 // Error handlers
 const notFound = require('./middleware/not-found');
 const errorHandler = require('./middleware/error-handler');
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to e-store');
 });
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

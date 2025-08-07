@@ -53,10 +53,61 @@ const register = asyncWrapperMiddleWare(async (req, res, next) => {
 });
 
 const login = asyncWrapperMiddleWare(async (req, res, next) => {
-  res.send('Login!');
+  let { email, password } = req.body;
+
+  if (!email || !password)
+    return next(
+      customErrorBuilder(
+        "Please provide values for 'email' and 'password' fields! ",
+        400
+      )
+    );
+
+  email = email.toLowerCase();
+
+  const userExists = await User.findOne({ email: email.toLowerCase() });
+
+  if (!userExists)
+    return next(
+      customErrorBuilder(
+        `User with email: ${email} doesn't exist in our database. Please Log in`,
+        400
+      )
+    );
+
+  // Verify password
+  const isPasswordCorrect = await passwordChecker(
+    password,
+    userExists.password
+  );
+
+  if (!isPasswordCorrect)
+    return next(
+      customErrorBuilder(
+        `Invalid credentials, please crosscheck your email and password`,
+        400
+      )
+    );
+
+  const tokenUser = {
+    userId: userExists._id,
+    name: userExists.name,
+    role: userExists.role,
+  };
+
+  // Fucntion generates and attaches cookies to headers
+  attachCookiesToResponse({ res, user: tokenUser });
+
+  res.status(200).json({ user: tokenUser });
 });
+
 const logout = asyncWrapperMiddleWare(async (req, res, next) => {
-  res.send('Logout!');
+  res.cookie('token', 'logout', {
+    httpOnly: true,
+    maxAge: 0,
+  });
+
+  res.status(200).send('logout successful');
 });
 
 module.exports = { register, login, logout };
