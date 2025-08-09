@@ -10,6 +10,7 @@ const checkPermissions = require('../utils/checkPermissions');
 const path = require('path');
 const cloudinary = require('cloudinary').v2;
 const { unlinkSync } = require('fs');
+const Review = require('../models/Review');
 
 // Create a product
 const createProduct = asyncWrapperMiddleWare(async (req, res, next) => {
@@ -28,7 +29,9 @@ const getAllProducts = asyncWrapperMiddleWare(async (req, res, next) => {
 
 // Get a single product
 const getSingleProduct = asyncWrapperMiddleWare(async (req, res, next) => {
-  const product = await Product.findOne({ _id: req.params.id });
+  const product = await Product.findOne({ _id: req.params.id }).populate(
+    'reviews'
+  );
 
   if (!product)
     return next(customErrorBuilder(`No product with id:${req.params.id}`, 400));
@@ -59,7 +62,13 @@ const deleteProduct = asyncWrapperMiddleWare(async (req, res, next) => {
     return next(customErrorBuilder(`No product with id:${req.params.id}`, 400));
 
   await Product.findOneAndDelete({ _id: req.params.id });
-  res.send('Product deleted successfully!');
+  // Delete associated reviews
+  const { deletedCount } = await Review.deleteMany({
+    product: req.params.id,
+  });
+  res.send(
+    `Product and the ${deletedCount} associated review(s) deleted successfully!`
+  );
 });
 
 // Uplaod an Image

@@ -40,6 +40,5 @@ router
     authorizePermissions('admin', 'owner'),
     deleteProduct
   );
-router.route('/:id');
 
 module.exports = router;
