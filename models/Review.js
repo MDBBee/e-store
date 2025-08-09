@@ -66,4 +66,8 @@ ReviewSchema.post('deleteOne', { document: true }, async function () {
   await this.constructor.calculateAverageRating(this.product);
 });
 
+ReviewSchema.post(/Update$/, async function () {
+  await this.constructor.calculateAverageRating(this.product);
+});
+
 module.exports = mongoose.model('Review', ReviewSchema);
