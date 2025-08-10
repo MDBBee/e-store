@@ -19,10 +19,12 @@ const db = require('./db/connect');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoute');
 const productRoutes = require('./routes/productRoutes');
-const reviewtRoutes = require('./routes/reviewRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 // Error handlers
 const notFound = require('./middleware/not-found');
 const errorHandler = require('./middleware/error-handler');
+const { authenticateUser } = require('./middleware/authentication');
 
 app.use(morgan('tiny'));
 app.use(cookieParser(process.env.JWT_SECRET));
@@ -36,7 +38,8 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/reviews', reviewtRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/orders', authenticateUser, orderRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
